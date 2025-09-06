@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typing Speed Test - Day 6 Challenge</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg:#060606; 
+      --panel:#0f1112; 
+      --muted:#9aa3a8; 
+      --accent:#22c55e;
+      --card:#0e1213; 
+      --soft:#1f2326;
+      --text:#e6edf1;
+      --error:#e74c3c;
+      --correct:#22c55e;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      color: var(--accent);
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 16px;
+      border-radius: 6px;
+      background: var(--soft);
+    }
+    .back-link:hover {
+      background: rgba(34, 197, 94, 0.1);
+    }
+    .back-link i {
+      margin-right: 8px;
+    }
+    .header h1 {
+      color: var(--accent);
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+    }
+    .header p {
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+    
+    /* Typing Test Container */
+    .typing-container {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+    }
+    
+    /* Stats */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .stat {
+      background: var(--card);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--soft);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    
+    /* Text Display */
+    .text-display {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      min-height: 180px;
+      border: 1px solid var(--soft);
+      font-size: 1.4rem;
+      line-height: 1.8;
+    }
+    .text-display span {
+      position: relative;
+    }
+    .text-display .correct {
+      color: var(--correct);
+    }
+    .text-display .incorrect {
+      color: var(--error);
+      background: rgba(231, 76, 60, 0.1);
+    }
+    .text-display .current {
+      background: rgba(34, 197, 94, 0.2);
+      border-bottom: 2px solid var(--accent);
+    }
+    
+    /* Input Area */
+    .input-container {
+      margin-bottom: 25px;
+    }
+    .typing-input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid var(--soft);
+      background: var(--card);
+      color: var(--text);
+      font-size: 1.1rem;
+      font-family: 'Poppins', sans-serif;
+      resize: none;
+      transition: border 0.3s;
+    }
+    .typing-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .control-btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 50px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .control-btn:not(:disabled):hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+    .start-btn {
+      background: var(--accent);
+      color: #051009;
+    }
+    .reset-btn {
+      background: var(--soft);
+      color: var(--text);
+    }
+    
+    /* Settings */
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .setting-group {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--soft);
+    }
+    .setting-title {
+      color: var(--text);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .setting-title i {
+      color: var(--accent);
+    }
+    .difficulty-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .difficulty-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .difficulty-btn.active {
+      background: var(--accent);
+      color: #051009;
+    }
+    
+    /* Results */
+    .results-container {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-top: 30px;
+      display: none;
+    }
+    .results-container.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    .results-title {
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+    .results-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    .result-stat {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--soft);
+    }
+    .result-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .result-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 20px 0;
+    }
+    .footer-link {
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      background: rgba(139, 148, 158, 0.1);
+    }
+    .footer-link:hover {
+      color: var(--accent);
+      background: rgba(88, 166, 255, 0.1);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2.2rem;
+      }
+      .stats-container, .results-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      .control-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .settings {
+        grid-template-columns: 1fr;
+      }
+      .text-display {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <a href="index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Blog
+      </a>
+      <h1>Typing Speed Test</h1>
+      <p>Day 6 of my 30-Day Coding Challenge - Test and improve your typing speed and accuracy</p>
+    </header>
+
+    <!-- Typing Test Container -->
+    <div class="typing-container">
+      <!-- Stats -->
+      <div class="stats-container">
+        <div class="stat">
+          <div class="stat-value" id="wpm">0</div>
+          <div class="stat-label">WPM</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="accuracy">100%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="timer">60</div>
+          <div class="stat-label">Time Left</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="errors">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+      </div>
+      
+      <!-- Text Display -->
+      <div class="text-display" id="textDisplay">
+        Click Start to begin the typing test. You will have 60 seconds to type as much as possible.
+      </div>
+      
+      <!-- Input Area -->
+      <div class="input-container">
+        <textarea 
+          class="typing-input" 
+          id="typingInput" 
+          placeholder="Start typing here..." 
+          rows="4"
+          disabled
+        ></textarea>
+      </div>
+      
+      <!-- Controls -->
+      <div class="controls">
+        <button class="control-btn start-btn" id="startBtn">
+          <i class="fas fa-play"></i> Start Test
+        </button>
+        <button class="control-btn reset-btn" id="resetBtn" disabled>
+          <i class="fas fa-redo"></i> Reset
+        </button>
+      </div>
+      
+      <!-- Settings -->
+      <div class="settings">
+        <div class="setting-group">
+          <h3 class="setting-title"><i class="fas fa-tachometer-alt"></i> Difficulty</h3>
+          <div class="difficulty-buttons">
+            <div class="difficulty-btn active" data-difficulty="easy">Easy</div>
+            <div class="difficulty-btn" data-difficulty="medium">Medium</div>
+            <div class="difficulty-btn" data-difficulty="hard">Hard</div>
+          </div>
+        </div>
+        
+        <div class="setting-group">
+          <h3 class="setting-title"><i class="fas fa-clock"></i> Time Duration</h3>
+          <div class="difficulty-buttons">
+            <div class="difficulty-btn" data-time="30">30s</div>
+            <div class="difficulty-btn active" data-time="60">60s</div>
+            <div class="difficulty-btn" data-time="120">120s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="results-container" id="resultsContainer">
+      <h2 class="results-title">Test Results</h2>
+      <div class="results-stats">
+        <div class="result-stat">
+          <div class="result-value" id="resultWpm">0</div>
+          <div class="result-label">Words Per Minute</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-value" id="resultAccuracy">100%</div>
+          <div class="result-label">Accuracy</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-value" id="resultErrors">0</div>
+          <div class="result-label">Errors</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-value" id="resultChars">0</div>
+          <div class="result-label">Characters Typed</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="control-btn start-btn" id="retryBtn">
+          <i class="fas fa-sync-alt"></i> Try Again
+        </button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#" class="footer-link">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+        <a href="#" class="footer-link">
+          <i class="fas fa-envelope"></i> Contact
+        </a>
+      </div>
+      <p>© 2023 Aryan Sunil | Day 6 of 30-Day Coding Challenge</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Elements
+      const textDisplay = document.getElementById('textDisplay');
+      const typingInput = document.getElementById('typingInput');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const retryBtn = document.getElementById('retryBtn');
+      const wpmElement = document.getElementById('wpm');
+      const accuracyElement = document.getElementById('accuracy');
+      const timerElement = document.getElementById('timer');
+      const errorsElement = document.getElementById('errors');
+      const resultsContainer = document.getElementById('resultsContainer');
+      const resultWpm = document.getElementById('resultWpm');
+      const resultAccuracy = document.getElementById('resultAccuracy');
+      const resultErrors = document.getElementById('resultErrors');
+      const resultChars = document.getElementById('resultChars');
+      const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+      const timeButtons = document.querySelectorAll('[data-time]');
+      
+      // Test variables
+      let timer;
+      let timeLeft = 60;
+      let isPlaying = false;
+      let originalText = '';
+      let currentText = '';
+      let currentIndex = 0;
+      let errors = 0;
+      let correctChars = 0;
+      let totalChars = 0;
+      let startTime;
+      let currentDifficulty = 'easy';
+      let currentTimeSetting = 60;
+      
+      // Sample texts for different difficulty levels
+      const sampleTexts = {
+        easy: [
+          "The quick brown fox jumps over the lazy dog. This sentence contains all letters of the English alphabet.",
+          "Programming is fun and challenging. It allows you to create amazing things with just a computer and your imagination.",
+          "Learning to type quickly and accurately is an important skill for developers and writers alike.",
+          "Practice makes perfect. The more you type, the better you will become at typing quickly without errors.",
+          "Coding requires attention to detail. A single misplaced character can change the entire meaning of your program."
+        ],
+        medium: [
+          "JavaScript is a versatile programming language that can be used for both frontend and backend development.",
+          "Responsive web design ensures that websites look good on all devices, from mobile phones to desktop computers.",
+          "Version control systems like Git help developers collaborate on projects and track changes to codebases.",
+          "Algorithms and data structures are fundamental concepts in computer science that every developer should understand.",
+          "Web development frameworks like React and Vue.js have revolutionized how we build interactive user interfaces."
+        ],
+        hard: [
+          "Asynchronous JavaScript and XML (AJAX) enables web pages to be updated asynchronously by exchanging data with a web server behind the scenes.",
+          "The Document Object Model (DOM) is a programming interface for web documents that represents the structure of a document as a tree of objects.",
+          "Representational State Transfer (REST) is an architectural style for designing networked applications that rely on stateless, client-server protocols.",
+          "Object-oriented programming (OOP) is a paradigm based on the concept of objects, which can contain data and code to manipulate that data.",
+          "Cascading Style Sheets (CSS) is a stylesheet language used to describe the presentation of a document written in HTML or XML."
+        ]
+      };
+      
+      // Initialize the test
+      function initTest() {
+        // Get random text based on difficulty
+        const texts = sampleTexts[currentDifficulty];
+        originalText = texts[Math.floor(Math.random() * texts.length)];
+        currentText = originalText;
+        currentIndex = 0;
+        errors = 0;
+        correctChars = 0;
+        totalChars = 0;
+        timeLeft = currentTimeSetting;
+        
+        // Display the text
+        renderText();
+        
+        // Update UI
+        updateStats();
+        typingInput.value = '';
+        typingInput.disabled = false;
+        startBtn.disabled = true;
+        resetBtn.disabled = false;
+        typingInput.focus();
+        
+        // Start the timer
+        startTimer();
+        
+        // Set start time for WPM calculation
+        startTime = new Date().getTime();
+        
+        isPlaying = true;
+      }
+      
+      // Render the text with formatting
+      function renderText() {
+        let html = '';
+        
+        for (let i = 0; i < currentText.length; i++) {
+          let char = currentText[i];
+          let charClass = '';
+          
+          if (i < currentIndex) {
+            charClass = 'correct';
+          } else if (i === currentIndex) {
+            charClass = 'current';
+          }
+          
+          html += `<span class="${charClass}">${char}</span>`;
+        }
+        
+        textDisplay.innerHTML = html;
+        // Scroll to keep current character in view
+        const currentCharElement = textDisplay.querySelector('.current');
+        if (currentCharElement) {
+          currentCharElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        }
+      }
+      
+      // Start the countdown timer
+      function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => {
+          timeLeft--;
+          timerElement.textContent = timeLeft;
+          
+          if (timeLeft <= 0) {
+            endTest();
+          }
+          
+          // Update WPM and accuracy in real-time
+          if (isPlaying) {
+            updateStats();
+          }
+        }, 1000);
+      }
+      
+      // Update statistics
+      function updateStats() {
+        // Calculate WPM (words per minute)
+        const currentTime = new Date().getTime();
+        const timeElapsed = (currentTime - startTime) / 1000 / 60; // in minutes
+        const wpm = timeElapsed > 0 ? Math.round((correctChars / 5) / timeElapsed) : 0;
+        
+        // Calculate accuracy
+        const accuracy = totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100;
+        
+        // Update UI
+        wpmElement.textContent = wpm;
+        accuracyElement.textContent = `${accuracy}%`;
+        errorsElement.textContent = errors;
+        timerElement.textContent = timeLeft;
+      }
+      
+      // End the test
+      function endTest() {
+        clearInterval(timer);
+        isPlaying = false;
+        typingInput.disabled = true;
+        startBtn.disabled = false;
+        resetBtn.disabled = true;
+        
+        // Calculate final stats
+        const timeElapsed = currentTimeSetting / 60; // in minutes
+        const wpm = timeElapsed > 0 ? Math.round((correctChars / 5) / timeElapsed) : 0;
+        const accuracy = totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100;
+        
+        // Show results
+        resultWpm.textContent = wpm;
+        resultAccuracy.textContent = `${accuracy}%`;
+        resultErrors.textContent = errors;
+        resultChars.textContent = totalChars;
+        resultsContainer.classList.add('show');
+      }
+      
+      // Handle input events
+      typingInput.addEventListener('input', (e) => {
+        if (!isPlaying) return;
+        
+        const typedChar = typingInput.value[currentIndex];
+        const expectedChar = originalText[currentIndex];
+        
+        if (typedChar === expectedChar) {
+          // Correct character
+          correctChars++;
+        } else {
+          // Incorrect character
+          errors++;
+        }
+        
+        totalChars++;
+        currentIndex++;
+        
+        // Update the display
+        renderText();
+        updateStats();
+        
+        // Check if we've reached the end of the text
+        if (currentIndex >= originalText.length) {
+          // Get new text
+          const texts = sampleTexts[currentDifficulty];
+          originalText = texts[Math.floor(Math.random() * texts.length)];
+          currentText = originalText;
+          currentIndex = 0;
+          renderText();
+        }
+      });
+      
+      // Start button event
+      startBtn.addEventListener('click', () => {
+        initTest();
+        resultsContainer.classList.remove('show');
+      });
+      
+      // Reset button event
+      resetBtn.addEventListener('click', () => {
+        clearInterval(timer);
+        isPlaying = false;
+        typingInput.disabled = true;
+        startBtn.disabled = false;
+        resetBtn.disabled = true;
+        textDisplay.textContent = "Click Start to begin the typing test. You will have 60 seconds to type as much as possible.";
+        wpmElement.textContent = "0";
+        accuracyElement.textContent = "100%";
+        timerElement.textContent = currentTimeSetting;
+        errorsElement.textContent = "0";
+        resultsContainer.classList.remove('show');
+      });
+      
+      // Retry button event
+      retryBtn.addEventListener('click', () => {
+        initTest();
+        resultsContainer.classList.remove('show');
+      });
+      
+      // Difficulty buttons event
+      difficultyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          if (isPlaying) return;
+          
+          difficultyButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          currentDifficulty = button.dataset.difficulty;
+        });
+      });
+      
+      // Time buttons event
+      timeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          if (isPlaying) return;
+          
+          timeButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          currentTimeSetting = parseInt(button.dataset.time);
+          timerElement.textContent = currentTimeSetting;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
